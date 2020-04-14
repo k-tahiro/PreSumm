@@ -23,6 +23,8 @@ import unicodedata
 from io import open
 
 from pytorch_transformers import cached_path
+from transformers import BertTokenizer as TBertTokenizer, BertJapaneseTokenizer
+
 
 logger = logging.getLogger(__name__)
 
@@ -380,3 +382,22 @@ def _is_punctuation(char):
     if cat.startswith("P"):
         return True
     return False
+
+
+class PreSummTokenizer:
+    def __init__(self, is_japanese: bool = False, *args, **kwargs):
+        if is_japanese:
+            tokenizer = BertJapaneseTokenizer(
+                'bert-base-japanese-whole-word-masking'
+            )
+            tokenizer.add_tokens(['[unused0]', '[unused1]', '[unused2]'])
+        else:
+            tokenizer = TBertTokenizer.from_pretrained('bert-base-uncased',
+                                                       *args,
+                                                       **kwargs)
+
+        self.convert_tokens_to_ids = tokenizer.convert_tokens_to_ids
+        self.tokenize = tokenizer.tokenize
+        self.vocab = tokenizer.vocab
+
+        self.tokenizer = tokenizer
