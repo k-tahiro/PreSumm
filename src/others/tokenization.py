@@ -99,7 +99,7 @@ class BertTokenizer(object):
         else:
             pretokens = list(enumerate(text.split()))
 
-        for i,token in pretokens:
+        for i, token in pretokens:
             # if(self.do_lower_case):
             #     token = token.lower()
             subtokens = self.wordpiece_tokenizer.tokenize(token)
@@ -192,12 +192,13 @@ class BasicTokenizer(object):
         text = self._tokenize_chinese_chars(text)
         orig_tokens = whitespace_tokenize(text)
         split_tokens = []
-        for i,token in enumerate(orig_tokens):
+        for i, token in enumerate(orig_tokens):
             if self.do_lower_case and token not in self.never_split:
                 token = token.lower()
                 token = self._run_strip_accents(token)
             # split_tokens.append(token)
-            split_tokens.extend([(i,t) for t in self._run_split_on_punc(token)])
+            split_tokens.extend([(i, t)
+                                 for t in self._run_split_on_punc(token)])
 
         # output_tokens = whitespace_tokenize(" ".join(split_tokens))
         return split_tokens

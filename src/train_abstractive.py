@@ -66,7 +66,9 @@ def run(args, device_id, error_queue):
     setattr(args, 'gpu_ranks', [int(i) for i in args.gpu_ranks])
 
     try:
-        gpu_rank = distributed.multi_init(device_id, args.world_size, args.gpu_ranks)
+        gpu_rank = distributed.multi_init(device_id,
+                                          args.world_size,
+                                          args.gpu_ranks)
         print('gpu_rank %d' % gpu_rank)
         if gpu_rank != args.gpu_ranks[device_id]:
             raise AssertionError("An error occurred in \
@@ -120,7 +122,11 @@ class ErrorHandler(object):
 def validate_abs(args, device_id):
     timestep = 0
     if (args.test_all):
-        cp_files = sorted(glob.glob(os.path.join(args.model_path, 'model_step_*.pt')))
+        cp_files = sorted(
+            glob.glob(
+                os.path.join(args.model_path, 'model_step_*.pt')
+            )
+        )
         cp_files.sort(key=os.path.getmtime)
         xent_lst = []
         for i, cp in enumerate(cp_files):
@@ -140,7 +146,11 @@ def validate_abs(args, device_id):
             test_abs(args, device_id, cp, step)
     else:
         while (True):
-            cp_files = sorted(glob.glob(os.path.join(args.model_path, 'model_step_*.pt')))
+            cp_files = sorted(
+                glob.glob(
+                    os.path.join(args.model_path, 'model_step_*.pt')
+                )
+            )
             cp_files.sort(key=os.path.getmtime)
             if (cp_files):
                 cp = cp_files[-1]
@@ -154,7 +164,11 @@ def validate_abs(args, device_id):
                     validate(args, device_id, cp, step)
                     test_abs(args, device_id, cp, step)
 
-            cp_files = sorted(glob.glob(os.path.join(args.model_path, 'model_step_*.pt')))
+            cp_files = sorted(
+                glob.glob(
+                    os.path.join(args.model_path, 'model_step_*.pt')
+                )
+            )
             cp_files.sort(key=os.path.getmtime)
             if (cp_files):
                 cp = cp_files[-1]
@@ -172,7 +186,8 @@ def validate(args, device_id, pt, step):
     else:
         test_from = args.test_from
     logger.info('Loading checkpoint from %s' % test_from)
-    checkpoint = torch.load(test_from, map_location=lambda storage, loc: storage)
+    checkpoint = torch.load(test_from,
+                            map_location=lambda storage, loc: storage)
     opt = vars(checkpoint['opt'])
     for k in opt.keys():
         if (k in model_flags):
@@ -192,7 +207,8 @@ def validate(args, device_id, pt, step):
     symbols = {'BOS': tokenizer.vocab['[unused0]'], 'EOS': tokenizer.vocab['[unused1]'],
                'PAD': tokenizer.vocab['[PAD]'], 'EOQ': tokenizer.vocab['[unused2]']}
 
-    valid_loss = abs_loss(model.generator, symbols, model.vocab_size, train=False, device=device)
+    valid_loss = abs_loss(model.generator, symbols,
+                          model.vocab_size, train=False, device=device)
 
     trainer = build_trainer(args, device_id, model, None, valid_loss)
     stats = trainer.validate(valid_iter, step)
@@ -207,7 +223,8 @@ def test_abs(args, device_id, pt, step):
         test_from = args.test_from
     logger.info('Loading checkpoint from %s' % test_from)
 
-    checkpoint = torch.load(test_from, map_location=lambda storage, loc: storage)
+    checkpoint = torch.load(test_from,
+                            map_location=lambda storage, loc: storage)
     opt = vars(checkpoint['opt'])
     for k in opt.keys():
         if (k in model_flags):
@@ -237,7 +254,8 @@ def test_text_abs(args, device_id, pt, step):
         test_from = args.test_from
     logger.info('Loading checkpoint from %s' % test_from)
 
-    checkpoint = torch.load(test_from, map_location=lambda storage, loc: storage)
+    checkpoint = torch.load(test_from,
+                            map_location=lambda storage, loc: storage)
     opt = vars(checkpoint['opt'])
     for k in opt.keys():
         if (k in model_flags):
@@ -305,8 +323,10 @@ def train_abs_single(args, device_id):
         checkpoint = None
 
     if (args.load_from_extractive != ''):
-        logger.info('Loading bert from extractive model %s' % args.load_from_extractive)
-        bert_from_extractive = torch.load(args.load_from_extractive, map_location=lambda storage, loc: storage)
+        logger.info('Loading bert from extractive model %s' %
+                    args.load_from_extractive)
+        bert_from_extractive = torch.load(args.load_from_extractive,
+                                          map_location=lambda storage, loc: storage)
         bert_from_extractive = bert_from_extractive['model']
     else:
         bert_from_extractive = None

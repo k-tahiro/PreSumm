@@ -1,6 +1,3 @@
-#encoding=utf-8
-
-
 import argparse
 import time
 
@@ -13,17 +10,18 @@ def do_format_to_lines(args):
     data_builder.format_to_lines(args)
     print(time.clock())
 
+
 def do_format_to_bert(args):
     print(time.clock())
     data_builder.format_to_bert(args)
     print(time.clock())
 
 
-
 def do_format_xsum_to_lines(args):
     print(time.clock())
     data_builder.format_xsum_to_lines(args)
     print(time.clock())
+
 
 def do_tokenize(args):
     print(time.clock())
@@ -58,8 +56,10 @@ if __name__ == '__main__':
     parser.add_argument('-min_tgt_ntokens', default=5, type=int)
     parser.add_argument('-max_tgt_ntokens', default=500, type=int)
 
-    parser.add_argument("-lower", type=str2bool, nargs='?',const=True,default=True)
-    parser.add_argument("-use_bert_basic_tokenizer", type=str2bool, nargs='?',const=True,default=False)
+    parser.add_argument("-lower", type=str2bool, nargs='?',
+                        const=True, default=True)
+    parser.add_argument("-use_bert_basic_tokenizer",
+                        type=str2bool, nargs='?', const=True, default=False)
 
     parser.add_argument('-log_file', default='../../logs/cnndm.log')
 

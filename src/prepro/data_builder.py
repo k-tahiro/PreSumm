@@ -30,7 +30,6 @@ def recover_from_corenlp(s):
     s = re.sub(r'\'\' {\w}', '\'\'\g<1>', s)
 
 
-
 def load_json(p, lower):
     source = []
     tgt = []
@@ -53,7 +52,6 @@ def load_json(p, lower):
     return source, tgt
 
 
-
 def load_xml(p):
     tree = ET.parse(p)
     root = tree.getroot()
@@ -61,20 +59,23 @@ def load_xml(p):
     title_node = list(root.iter('hedline'))
     if (len(title_node) > 0):
         try:
-            title = [p.text.lower().split() for p in list(title_node[0].iter('hl1'))][0]
+            title = [p.text.lower().split()
+                     for p in list(title_node[0].iter('hl1'))][0]
         except:
             print(p)
 
     else:
         return None, None
     byline_node = list(root.iter('byline'))
-    byline_node = [n for n in byline_node if n.attrib['class'] == 'normalized_byline']
+    byline_node = [n for n in byline_node
+                   if n.attrib['class'] == 'normalized_byline']
     if (len(byline_node) > 0):
         byline = byline_node[0].text.lower().split()
     abs_node = list(root.iter('abstract'))
     if (len(abs_node) > 0):
         try:
-            abs = [p.text.lower().split() for p in list(abs_node[0].iter('p'))][0]
+            abs = [p.text.lower().split()
+                   for p in list(abs_node[0].iter('p'))][0]
         except:
             print(p)
 
@@ -111,7 +112,8 @@ def tokenize(args):
     stories_dir = os.path.abspath(args.raw_path)
     tokenized_stories_dir = os.path.abspath(args.save_path)
 
-    print("Preparing to tokenize %s to %s..." % (stories_dir, tokenized_stories_dir))
+    print("Preparing to tokenize %s to %s..." %
+          (stories_dir, tokenized_stories_dir))
     stories = os.listdir(stories_dir)
     # make IO list file
     print("Making list of files to tokenize...")
@@ -123,7 +125,8 @@ def tokenize(args):
     command = ['java', 'edu.stanford.nlp.pipeline.StanfordCoreNLP', '-annotators', 'tokenize,ssplit',
                '-ssplit.newlineIsSentenceBreak', 'always', '-filelist', 'mapping_for_corenlp.txt', '-outputFormat',
                'json', '-outputDirectory', tokenized_stories_dir]
-    print("Tokenizing %i files in %s and saving in %s..." % (len(stories), stories_dir, tokenized_stories_dir))
+    print("Tokenizing %i files in %s and saving in %s..." %
+          (len(stories), stories_dir, tokenized_stories_dir))
     subprocess.call(command)
     print("Stanford CoreNLP Tokenizer has finished.")
     os.remove("mapping_for_corenlp.txt")
@@ -135,7 +138,9 @@ def tokenize(args):
         raise Exception(
             "The tokenized stories directory %s contains %i files, but it should contain the same number as %s (which has %i files). Was there an error during tokenization?" % (
                 tokenized_stories_dir, num_tokenized, stories_dir, num_orig))
-    print("Successfully finished tokenizing %s to %s.\n" % (stories_dir, tokenized_stories_dir))
+    print("Successfully finished tokenizing %s to %s.\n" %
+          (stories_dir, tokenized_stories_dir))
+
 
 def cal_rouge(evaluated_ngrams, reference_ngrams):
     reference_count = len(reference_ngrams)
@@ -226,7 +231,8 @@ class BertData():
 
         original_src_txt = [' '.join(s) for s in src]
 
-        idxs = [i for i, s in enumerate(src) if (len(s) > self.args.min_src_ntokens_per_sent)]
+        idxs = [i for i, s in enumerate(src)
+                if (len(s) > self.args.min_src_ntokens_per_sent)]
 
         _sent_labels = [0] * len(src)
         for l in sent_labels:
@@ -247,7 +253,8 @@ class BertData():
 
         src_subtokens = [self.cls_token] + src_subtokens + [self.sep_token]
         src_subtoken_idxs = self.tokenizer.convert_tokens_to_ids(src_subtokens)
-        _segs = [-1] + [i for i, t in enumerate(src_subtoken_idxs) if t == self.sep_vid]
+        _segs = [-1] + [i for i, t in enumerate(src_subtoken_idxs)
+                        if t == self.sep_vid]
         segs = [_segs[i] - _segs[i - 1] for i in range(1, len(_segs))]
         segments_ids = []
         for i, s in enumerate(segs):
@@ -255,7 +262,8 @@ class BertData():
                 segments_ids += s * [0]
             else:
                 segments_ids += s * [1]
-        cls_ids = [i for i, t in enumerate(src_subtoken_idxs) if t == self.cls_vid]
+        cls_ids = [i for i, t in enumerate(src_subtoken_idxs)
+                   if t == self.cls_vid]
         sent_labels = sent_labels[:len(cls_ids)]
 
         tgt_subtokens_str = '[unused0] ' + ' [unused2] '.join(
@@ -281,7 +289,10 @@ def format_to_bert(args):
         a_lst = []
         for json_f in glob.glob(pjoin(args.raw_path, '*' + corpus_type + '.*.json')):
             real_name = json_f.split('/')[-1]
-            a_lst.append((corpus_type, json_f, args, pjoin(args.save_path, real_name.replace('json', 'bert.pt'))))
+            a_lst.append(
+                (corpus_type, json_f, args,
+                 pjoin(args.save_path, real_name.replace('json', 'bert.pt')))
+            )
         print(a_lst)
         pool = Pool(args.n_cpus)
         for d in pool.imap(_format_to_bert, a_lst):
@@ -356,7 +367,8 @@ def format_to_lines(args):
         for d in pool.imap_unordered(_format_to_lines, a_lst):
             dataset.append(d)
             if (len(dataset) > args.shard_size):
-                pt_file = "{:s}.{:s}.{:d}.json".format(args.save_path, corpus_type, p_ct)
+                pt_file = "{:s}.{:s}.{:d}.json".format(
+                    args.save_path, corpus_type, p_ct)
                 with open(pt_file, 'w') as save:
                     # save.write('\n'.join(dataset))
                     save.write(json.dumps(dataset))
@@ -366,7 +378,8 @@ def format_to_lines(args):
         pool.close()
         pool.join()
         if (len(dataset) > 0):
-            pt_file = "{:s}.{:s}.{:d}.json".format(args.save_path, corpus_type, p_ct)
+            pt_file = "{:s}.{:s}.{:d}.json".format(
+                args.save_path, corpus_type, p_ct)
             with open(pt_file, 'w') as save:
                 # save.write('\n'.join(dataset))
                 save.write(json.dumps(dataset))
@@ -381,15 +394,14 @@ def _format_to_lines(params):
     return {'src': source, 'tgt': tgt}
 
 
-
-
 def format_xsum_to_lines(args):
     if (args.dataset != ''):
         datasets = [args.dataset]
     else:
         datasets = ['train', 'test', 'valid']
 
-    corpus_mapping = json.load(open(pjoin(args.raw_path, 'XSum-TRAINING-DEV-TEST-SPLIT-90-5-5.json')))
+    corpus_mapping = json.load(open(pjoin(args.raw_path,
+                                          'XSum-TRAINING-DEV-TEST-SPLIT-90-5-5.json')))
 
     for corpus_type in datasets:
         mapped_fnames = corpus_mapping[corpus_type]
@@ -407,7 +419,8 @@ def format_xsum_to_lines(args):
                 continue
             dataset.append(d)
             if (len(dataset) > args.shard_size):
-                pt_file = "{:s}.{:s}.{:d}.json".format(args.save_path, corpus_type, p_ct)
+                pt_file = "{:s}.{:s}.{:d}.json".format(
+                    args.save_path, corpus_type, p_ct)
                 with open(pt_file, 'w') as save:
                     save.write(json.dumps(dataset))
                     p_ct += 1
@@ -416,7 +429,8 @@ def format_xsum_to_lines(args):
         pool.close()
         pool.join()
         if (len(dataset) > 0):
-            pt_file = "{:s}.{:s}.{:d}.json".format(args.save_path, corpus_type, p_ct)
+            pt_file = "{:s}.{:s}.{:d}.json".format(
+                args.save_path, corpus_type, p_ct)
             with open(pt_file, 'w') as save:
                 save.write(json.dumps(dataset))
                 p_ct += 1
