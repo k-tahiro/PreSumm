@@ -67,6 +67,8 @@ if __name__ == '__main__':
 
     parser.add_argument('-n_cpus', default=2, type=int)
 
+    # additional arguments
+    parser.add_argument('--is-japanese', action='store_true')
 
     args = parser.parse_args()
     init_logger(args.log_file)
