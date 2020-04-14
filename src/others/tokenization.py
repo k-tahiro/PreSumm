@@ -388,7 +388,7 @@ def _is_punctuation(char):
 class PreSummTokenizer:
     def __init__(self, is_japanese: bool = False, *args, **kwargs):
         if is_japanese:
-            tokenizer = BertJapaneseTokenizer(
+            tokenizer = BertJapaneseTokenizer.from_pretrained(
                 'bert-base-japanese-whole-word-masking'
             )
             tokenizer.add_tokens(['[unused0]', '[unused1]', '[unused2]'])
