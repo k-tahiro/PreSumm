@@ -389,9 +389,12 @@ class PreSummTokenizer:
     def __init__(self, is_japanese: bool = False, *args, **kwargs):
         if is_japanese:
             tokenizer = BertJapaneseTokenizer.from_pretrained(
-                'bert-base-japanese-whole-word-masking'
+                'cl-tohoku/bert-base-japanese-whole-word-masking'
             )
             tokenizer.add_tokens(['[unused0]', '[unused1]', '[unused2]'])
+            tokenizer.vocab['[unused0]'] = 32000
+            tokenizer.vocab['[unused1]'] = 32001
+            tokenizer.vocab['[unused2]'] = 32002
         else:
             tokenizer = TBertTokenizer.from_pretrained('bert-base-uncased',
                                                        *args,
