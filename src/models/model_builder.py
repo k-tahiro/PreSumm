@@ -5,6 +5,8 @@ import torch.nn as nn
 from pytorch_transformers import BertModel, BertConfig
 from torch.nn.init import xavier_uniform_
 
+from transformers import BertModel as TBertModel
+
 from models.decoder import TransformerDecoder
 from models.encoder import Classifier, ExtTransformerEncoder
 from models.optimizers import Optimizer
@@ -118,22 +120,31 @@ def get_generator(vocab_size, dec_hidden_size, device):
 class Bert(nn.Module):
     def __init__(self, large, temp_dir, finetune=False, is_japanese: bool = False):
         super(Bert, self).__init__()
-        if(large):
-            self.model = BertModel.from_pretrained('bert-large-uncased',
-                                                   cache_dir=temp_dir)
+        if is_japanese:
+            self.model = TBertModel.from_pretrained('cl-tohoku/bert-base-japanese-whole-word-masking',
+                                                    cache_dir=temp_dir)
+            self.model.resize_token_embeddings(32003)
         else:
-            self.model = BertModel.from_pretrained('bert-base-uncased',
-                                                   cache_dir=temp_dir)
+            if(large):
+                self.model = BertModel.from_pretrained('bert-large-uncased',
+                                                       cache_dir=temp_dir)
+            else:
+                self.model = BertModel.from_pretrained('bert-base-uncased',
+                                                       cache_dir=temp_dir)
 
         self.finetune = finetune
 
     def forward(self, x, segs, mask):
         if(self.finetune):
-            top_vec, _ = self.model(x, segs, attention_mask=mask)
+            top_vec, _ = self.model(x,
+                                    token_type_ids=segs,
+                                    attention_mask=mask)
         else:
             self.eval()
             with torch.no_grad():
-                top_vec, _ = self.model(x, segs, attention_mask=mask)
+                top_vec, _ = self.model(x,
+                                        token_type_ids=segs,
+                                        attention_mask=mask)
         return top_vec
 
 
