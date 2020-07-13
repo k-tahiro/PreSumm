@@ -401,6 +401,7 @@ class PreSummTokenizer:
                                                        **kwargs)
 
         self.convert_tokens_to_ids = tokenizer.convert_tokens_to_ids
+        self.convert_ids_to_tokens = tokenizer.convert_ids_to_tokens
         self.tokenize = tokenizer.tokenize
         self.vocab = tokenizer.vocab
 

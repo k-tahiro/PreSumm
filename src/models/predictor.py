@@ -93,7 +93,7 @@ class Translator(object):
                 tokens = tokens[:-1]
                 break
         tokens = [t for t in tokens if t < len(self.vocab)]
-        tokens = self.vocab.DecodeIds(tokens).split(' ')
+        tokens = self.vocab.convert_tokens_to_ids(tokens).split(' ')
         return tokens
 
     def from_batch(self, translation_batch):
