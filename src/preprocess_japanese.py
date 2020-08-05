@@ -22,8 +22,14 @@ class GreedySelector:
                 if (i in selected):
                     continue
                 c = selected + [i]
-                hypothesis = '\n'.join([doc_sent_list[idx] for idx in c])
-                reference = '\n'.join([abstract_sent_list[idx] for idx in c])
+                hypothesis = '\n'.join([
+                    ' '.join(doc_sent_list[idx])
+                    for idx in c
+                ])
+                reference = '\n'.join([
+                    ' '.join(tokens)
+                    for tokens in abstract_sent_list
+                ])
                 score = self._rouge.get_scores(hypothesis, reference)
                 rouge_1 = score[0]['rouge-1']['f']
                 rouge_2 = score[0]['rouge-2']['f']
