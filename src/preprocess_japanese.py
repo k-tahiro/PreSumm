@@ -208,5 +208,6 @@ def main():
 
     converter = PreSummDataConverter()
     dataset = df.apply(lambda x: converter(getattr(x, args.src_col),
-                                           getattr(x, args.tgt_col)))
+                                           getattr(x, args.tgt_col)),
+                       axis=1)
     torch.save(dataset, 'bert_data/jp.all.bert.pt')
