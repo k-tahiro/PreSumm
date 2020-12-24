@@ -23,6 +23,8 @@ import unicodedata
 from io import open
 
 from pytorch_transformers import cached_path
+from transformers import BertTokenizer as TBertTokenizer, BertJapaneseTokenizer
+
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +99,7 @@ class BertTokenizer(object):
         else:
             pretokens = list(enumerate(text.split()))
 
-        for i,token in pretokens:
+        for i, token in pretokens:
             # if(self.do_lower_case):
             #     token = token.lower()
             subtokens = self.wordpiece_tokenizer.tokenize(token)
@@ -190,12 +192,13 @@ class BasicTokenizer(object):
         text = self._tokenize_chinese_chars(text)
         orig_tokens = whitespace_tokenize(text)
         split_tokens = []
-        for i,token in enumerate(orig_tokens):
+        for i, token in enumerate(orig_tokens):
             if self.do_lower_case and token not in self.never_split:
                 token = token.lower()
                 token = self._run_strip_accents(token)
             # split_tokens.append(token)
-            split_tokens.extend([(i,t) for t in self._run_split_on_punc(token)])
+            split_tokens.extend([(i, t)
+                                 for t in self._run_split_on_punc(token)])
 
         # output_tokens = whitespace_tokenize(" ".join(split_tokens))
         return split_tokens
@@ -380,3 +383,26 @@ def _is_punctuation(char):
     if cat.startswith("P"):
         return True
     return False
+
+
+class PreSummTokenizer:
+    def __init__(self, is_japanese: bool = False, *args, **kwargs):
+        if is_japanese:
+            tokenizer = BertJapaneseTokenizer.from_pretrained(
+                'cl-tohoku/bert-base-japanese-whole-word-masking'
+            )
+            tokenizer.add_tokens(['[unused0]', '[unused1]', '[unused2]'])
+            tokenizer.vocab['[unused0]'] = 32000
+            tokenizer.vocab['[unused1]'] = 32001
+            tokenizer.vocab['[unused2]'] = 32002
+        else:
+            tokenizer = TBertTokenizer.from_pretrained('bert-base-uncased',
+                                                       *args,
+                                                       **kwargs)
+
+        self.convert_tokens_to_ids = tokenizer.convert_tokens_to_ids
+        self.convert_ids_to_tokens = tokenizer.convert_ids_to_tokens
+        self.tokenize = tokenizer.tokenize
+        self.vocab = tokenizer.vocab
+
+        self.tokenizer = tokenizer
